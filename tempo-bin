@@ -1,0 +1,6 @@
+# set server timezone in CET before time module imported
+__import__('os').environ['TZ'] = 'CET'
+import tempo  # noqa: E402
+
+if __name__ == "__main__":
+    tempo.cli.commands.execute_command()
