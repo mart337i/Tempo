@@ -11,7 +11,6 @@ PROG_NAME = Path(sys.argv[0]).name
 commands = {}
 """All loaded commands"""
 
-
 class Command:
     name = None
     description = None

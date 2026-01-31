@@ -1,0 +1,48 @@
+# Tempo Configuration File
+# 
+# This is an example configuration file for Tempo.
+# Copy this file to 'tempo.conf' and modify as needed.
+#
+# Configuration priority (highest to lowest):
+#   1. CLI arguments (e.g., --port 9000)
+#   2. Config file specified with --config
+#   3. ./tempo.conf (this file)
+#   4. Default values
+#
+# All settings in this file are optional. If not specified,
+# default values will be used.
+
+[server]
+# API server name (displayed in documentation)
+name = Tempo API
+
+# Host to bind the server to
+# Use 0.0.0.0 to accept connections from any network interface
+# Use 127.0.0.1 to only accept local connections
+host = 0.0.0.0
+
+# Port to bind the server to
+port = 8000
+
+# Enable auto-reload on code changes (development mode)
+# Set to true for development, false for production
+reload = false
+
+# Number of worker processes
+# Use 1 for development (required for reload)
+# Use 4+ for production for better performance
+workers = 1
+
+# OpenAPI documentation URL
+# Set to empty string to disable
+openapi_url = /openapi.json
+
+# Swagger UI documentation URL
+# Set to empty string to disable
+docs_url = /docs
+
+# API description
+description = Tempo API
+
+# API version
+version = 0.1.0

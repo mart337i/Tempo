@@ -4,12 +4,14 @@ import importlib
 import string
 
 # Third-party imports
-from fastapi import Depends, FastAPI, APIRouter
+from fastapi import Depends, APIRouter
+from fastapi import FastAPI as FastAPIBase
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
 
 import logging
+
 _logger = logging.getLogger(__name__)
 
 # Miscellaneous
@@ -18,23 +20,23 @@ import urllib3
 # Disable SSL warnings
 urllib3.disable_warnings()
 
-class FastAPI(FastAPI):
-    def __init__(
-            self,
-            **kwargs
-        ):
-        
+
+class FastAPI(FastAPIBase):
+    def __init__(self, **kwargs):
         # Run Base class init
         super().__init__(
-            title=kwargs.get('name', 'Tempo API'),
-            openapi_url=kwargs.get('openapi_url', '/openapi.json'),
-            docs_url=kwargs.get('docs_url', '/docs'),
-            description=kwargs.get('description', 'Tempo API'),
-            version=kwargs.get('version', '0.1.0'),
-            license_info=kwargs.get('license_info', {
-                "name": "Apache 2.0",
-                "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
-            }),
+            title=kwargs.get("name", "Tempo API"),
+            openapi_url=kwargs.get("openapi_url", "/openapi.json"),
+            docs_url=kwargs.get("docs_url", "/docs"),
+            description=kwargs.get("description", "Tempo API"),
+            version=kwargs.get("version", "0.1.0"),
+            license_info=kwargs.get(
+                "license_info",
+                {
+                    "name": "Apache 2.0",
+                    "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+                },
+            ),
         )
 
     def configure(self):
@@ -52,7 +54,7 @@ class FastAPI(FastAPI):
 
     def setup_addon_routers(self) -> None:
         """
-            Import all routes using dynamic importing
+        Import all routes using dynamic importing
         """
         ...
 
@@ -89,7 +91,9 @@ class FastAPI(FastAPI):
         for route in self.routes:
             if isinstance(route, APIRoute):
                 if route.name in route_names:
-                    raise Exception(f"Route function names {[route.name]} should be unique")
+                    raise Exception(
+                        f"Route function names {[route.name]} should be unique"
+                    )
                 if route.path in route_prefix:
                     raise Exception(f"Route prefix {[route.path]} should be unique")
                 route.operation_id = route.name
@@ -99,14 +103,16 @@ class FastAPI(FastAPI):
     def include_router_from_module(self, module_name: str):
         """
         Import module and check if it contains 'router' attribute.
-        if it does include the route in the fastapi app 
+        if it does include the route in the fastapi app
         """
         try:
             module = importlib.import_module(module_name)
-            if hasattr(module, 'router'):
+            if hasattr(module, "router"):
                 if not isinstance(module.router, APIRouter):
                     print(isinstance(module.router, APIRoute))
-                    _logger.debug(f"Failed to registre router from module: {module_name}")
+                    _logger.debug(
+                        f"Failed to registre router from module: {module_name}"
+                    )
                     return
 
                 self.include_router(
@@ -117,29 +123,74 @@ class FastAPI(FastAPI):
         except ModuleNotFoundError as e:
             _logger.error(f"Module not found: {module_name}, error: {e}")
         except AttributeError as e:
-            _logger.error(f"Module '{module_name}' does not have 'router' attribute, error: {e}")
+            _logger.error(
+                f"Module '{module_name}' does not have 'router' attribute, error: {e}"
+            )
         except Exception as e:
-            _logger.error(f"Module '{module_name}' failed with the following error: {e}")
+            _logger.error(
+                f"Module '{module_name}' failed with the following error: {e}"
+            )
 
     def start(self, **kwargs):
+        """
+        Start the server with uvicorn.
+
+        This method exports configuration to environment variables before
+        starting uvicorn, allowing the factory function to read the config.
+        """
+        from tempo.config import TempoConfig
+
+        # Create config and update with CLI arguments
+        config = TempoConfig(config_file=kwargs.get("config"))
+        config.update_from_args(kwargs)
+
+        # Export to environment variables for factory communication
+        config.export_to_env()
+
+        # Get server configuration
+        server_config = config.get_server_config()
+
         # Start the server with uvicorn
         uvicorn.run(
             app=f"tempo.fastapi:create_api",
-            host=kwargs.get("host"),
-            port=kwargs.get("port"),
-            reload=True,
-            workers=kwargs.get("workers"),
+            host=server_config["host"],
+            port=server_config["port"],
+            reload=server_config["reload"],
+            workers=server_config["workers"],
             timeout_keep_alive=30,
             log_config=None,
-            access_log=None,
-            factory=True
+            factory=True,
         )
 
-def create_api(kwargs) -> FastAPI:
+
+def create_api() -> FastAPI:
+    """
+    Factory function to create the FastAPI application.
+
+    This function is called by uvicorn in factory mode. It reads configuration
+    from environment variables that were set by the CLI before starting uvicorn.
+
+    Returns:
+        Configured FastAPI application instance
+    """
+    from tempo.config import TempoConfig
+
+    # Create a fresh config instance to read from environment variables
+    # Do NOT use get_config() singleton here because it may have been
+    # initialized before environment variables were set
+    config = TempoConfig()
+    server_config = config.get_server_config()
+
+    # Create FastAPI instance with configuration
     api = FastAPI(
-        **values
+        name=server_config["name"],
+        openapi_url=server_config["openapi_url"],
+        docs_url=server_config["docs_url"],
+        description=server_config["description"],
+        version=server_config["version"],
     )
 
+    # Configure routes, middleware, etc.
     api.configure()
 
     return api
