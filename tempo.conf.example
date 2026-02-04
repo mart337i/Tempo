@@ -46,3 +46,12 @@ description = Tempo API
 
 # API version
 version = 0.1.0
+
+# ---------------------------------------------------------------------------
+# Database (optional)
+# ---------------------------------------------------------------------------
+# SQLAlchemy connection URL. Leave empty or omit to disable the database layer.
+# Requires: pip install sqlalchemy psycopg2-binary
+#
+# [database]
+# url = postgresql://user:password@localhost:5432/dbname

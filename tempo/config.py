@@ -26,7 +26,10 @@ class TempoConfig:
             "docs_url": "/docs",
             "description": "Tempo API",
             "version": "0.1.0",
-        }
+        },
+        "database": {
+            "url": "",
+        },
     }
 
     def __init__(self, config_file: Optional[str] = None):
