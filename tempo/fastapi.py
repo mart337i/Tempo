@@ -1,7 +1,9 @@
 # Standard library imports
 import os
+import sys
 import importlib
 import string
+from pathlib import Path
 
 # Third-party imports
 from fastapi import Depends, APIRouter
@@ -54,9 +56,53 @@ class FastAPI(FastAPIBase):
 
     def setup_addon_routers(self) -> None:
         """
-        Import all routes using dynamic importing
+        Scan the addons/ directory and dynamically register every addon router.
+
+        Convention: each addon is a subdirectory of addons/ that contains a
+        router.py exposing a FastAPI APIRouter instance named ``router``.
+
+            addons/
+            ├── __init__.py
+            ├── users/
+            │   ├── __init__.py
+            │   └── router.py          # has: router = APIRouter(...)
+            └── products/
+                ├── __init__.py
+                └── router.py
+
+        The addons directory is resolved relative to the project root that is
+        already on sys.path (added by tempo/__init__.py).
         """
-        ...
+        # Locate the addons/ directory.  Walk up from this file (tempo/fastapi.py)
+        # to the project root, then into addons/.
+        project_root = Path(__file__).resolve().parent.parent
+        addons_dir = project_root / "addons"
+
+        if not addons_dir.is_dir():
+            _logger.debug("No addons/ directory found at %s", addons_dir)
+            return
+
+        # Ensure project root is importable (belt-and-suspenders; tempo/__init__.py
+        # already does this, but the factory process may not have gone through it).
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+
+        # Walk every direct child of addons/; if it looks like a package with a
+        # router module, register it.
+        for addon_path in sorted(addons_dir.iterdir()):
+            if not addon_path.is_dir():
+                continue
+            # Skip hidden dirs and __pycache__
+            if addon_path.name.startswith((".", "_")):
+                continue
+            # Must have a router.py to be considered an addon
+            if not (addon_path / "router.py").is_file():
+                _logger.debug("Skipping %s — no router.py found", addon_path.name)
+                continue
+
+            module_name = f"addons.{addon_path.name}.router"
+            _logger.debug("Loading addon router: %s", module_name)
+            self.include_router_from_module(module_name)
 
     def setup_middleware(self):
         origins = [
@@ -87,18 +133,21 @@ class FastAPI(FastAPIBase):
         Should be called only after all routes have been added.
         """
         route_names = set()
-        route_prefix = set()
+        route_endpoints = set()  # (path, frozenset(methods)) pairs
         for route in self.routes:
             if isinstance(route, APIRoute):
                 if route.name in route_names:
                     raise Exception(
                         f"Route function names {[route.name]} should be unique"
                     )
-                if route.path in route_prefix:
-                    raise Exception(f"Route prefix {[route.path]} should be unique")
+                endpoint_key = (route.path, frozenset(route.methods or []))
+                if endpoint_key in route_endpoints:
+                    raise Exception(
+                        f"Route {route.path} {route.methods} should be unique"
+                    )
                 route.operation_id = route.name
                 route_names.add(route.name)
-                route_prefix.add(route.path)
+                route_endpoints.add(endpoint_key)
 
     def include_router_from_module(self, module_name: str):
         """

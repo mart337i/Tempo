@@ -1,0 +1,20 @@
+"""
+{{ name | pascal }} Models
+
+Database models for {{ name }} (placeholder for ORM integration).
+"""
+
+# This is a placeholder for database models.
+# When you integrate an ORM like SQLAlchemy or Tortoise ORM, define your models here.
+#
+# Example with SQLAlchemy:
+#
+# from sqlalchemy import Column, Integer, String
+# from database import Base
+#
+# class {{ name | pascal }}(Base):
+#     __tablename__ = "{{ name | snake }}s"
+#
+#     id = Column(Integer, primary_key=True, index=True)
+#     name = Column(String(100), nullable=False)
+#     description = Column(String(500))

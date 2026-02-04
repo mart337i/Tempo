@@ -1,0 +1,52 @@
+"""
+{{ name | pascal }} Controller
+
+Handles request/response logic and coordinates between router and service layer.
+"""
+
+from typing import List, Optional
+
+from .service import {{ name | pascal }}Service
+from .schemas import {{ name | pascal }}Create, {{ name | pascal }}Update, {{ name | pascal }}Response
+
+
+class {{ name | pascal }}Controller:
+    """
+    Controller for {{ name }} operations.
+    
+    Responsibilities:
+    - Validate input data
+    - Coordinate service calls
+    - Transform service responses to API responses
+    """
+
+    def __init__(self):
+        self.service = {{ name | pascal }}Service()
+
+    async def list_all(self) -> List[{{ name | pascal }}Response]:
+        """Retrieve all {{ name | snake }} records."""
+        items = await self.service.get_all()
+        return [{{ name | pascal }}Response(**item) for item in items]
+
+    async def get_by_id(self, id: int) -> Optional[{{ name | pascal }}Response]:
+        """Retrieve a {{ name | snake }} by ID."""
+        item = await self.service.get_by_id(id)
+        if item:
+            return {{ name | pascal }}Response(**item)
+        return None
+
+    async def create(self, data: {{ name | pascal }}Create) -> {{ name | pascal }}Response:
+        """Create a new {{ name | snake }}."""
+        item = await self.service.create(data.model_dump())
+        return {{ name | pascal }}Response(**item)
+
+    async def update(self, id: int, data: {{ name | pascal }}Update) -> Optional[{{ name | pascal }}Response]:
+        """Update an existing {{ name | snake }}."""
+        item = await self.service.update(id, data.model_dump(exclude_unset=True))
+        if item:
+            return {{ name | pascal }}Response(**item)
+        return None
+
+    async def delete(self, id: int) -> bool:
+        """Delete a {{ name | snake }}."""
+        return await self.service.delete(id)

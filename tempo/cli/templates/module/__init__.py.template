@@ -1,0 +1,9 @@
+"""
+{{ name | pascal }} API Module
+
+This module provides {{ name }} functionality for the Tempo API platform.
+"""
+
+from .router import router
+
+__all__ = ["router"]

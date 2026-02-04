@@ -1,0 +1,78 @@
+# {{ name | pascal }} API Module
+
+This module provides CRUD operations for {{ name }} resources.
+
+## Architecture
+
+This module follows the MVCS (Model-View-Controller-Service) pattern:
+
+- **Models** (`models.py`): Database/ORM models (placeholder)
+- **Schemas** (`schemas.py`): Pydantic models for request/response validation
+- **Controller** (`controller.py`): Request handling and coordination logic
+- **Service** (`service.py`): Business logic layer
+- **Router** (`router.py`): API endpoint definitions (the "View" layer)
+
+## Endpoints
+
+### List All {{ name | pascal }}s
+```
+GET /{{ name | snake }}/
+```
+Returns a list of all {{ name | snake }} records.
+
+### Get {{ name | pascal }} by ID
+```
+GET /{{ name | snake }}/{id}
+```
+Returns a specific {{ name | snake }} record.
+
+### Create {{ name | pascal }}
+```
+POST /{{ name | snake }}/
+```
+Creates a new {{ name | snake }} record.
+
+**Request Body:**
+```json
+{
+  "name": "Example {{ name | pascal }}",
+  "description": "Optional description"
+}
+```
+
+### Update {{ name | pascal }}
+```
+PUT /{{ name | snake }}/{id}
+```
+Updates an existing {{ name | snake }} record.
+
+**Request Body:**
+```json
+{
+  "name": "Updated name",
+  "description": "Updated description"
+}
+```
+
+### Delete {{ name | pascal }}
+```
+DELETE /{{ name | snake }}/{id}
+```
+Deletes a {{ name | snake }} record.
+
+## Data Storage
+
+Currently uses an in-memory store for demonstration purposes. To integrate with a real database:
+
+1. Define your models in `models.py`
+2. Create a repository class to handle database operations
+3. Inject the repository into the service layer
+4. Update service methods to use the repository
+
+## Customization
+
+Feel free to modify:
+- **Schemas**: Add/remove fields in `schemas.py`
+- **Business Logic**: Implement custom logic in `service.py`
+- **Validation**: Add custom validators in `controller.py`
+- **Routes**: Customize endpoints in `router.py`

@@ -1,0 +1,33 @@
+"""
+{{ name | pascal }} Schemas
+
+Pydantic models for request/response validation.
+"""
+
+from pydantic import BaseModel, Field
+from typing import Optional
+
+
+class {{ name | pascal }}Base(BaseModel):
+    """Base schema with common {{ name | snake }} fields."""
+    name: str = Field(..., min_length=1, max_length=100, description="{{ name | pascal }} name")
+    description: Optional[str] = Field(None, max_length=500, description="{{ name | pascal }} description")
+
+
+class {{ name | pascal }}Create({{ name | pascal }}Base):
+    """Schema for creating a {{ name | snake }}."""
+    pass
+
+
+class {{ name | pascal }}Update(BaseModel):
+    """Schema for updating a {{ name | snake }}. All fields are optional."""
+    name: Optional[str] = Field(None, min_length=1, max_length=100, description="{{ name | pascal }} name")
+    description: Optional[str] = Field(None, max_length=500, description="{{ name | pascal }} description")
+
+
+class {{ name | pascal }}Response({{ name | pascal }}Base):
+    """Schema for {{ name | snake }} responses."""
+    id: int = Field(..., description="Unique identifier")
+
+    class Config:
+        from_attributes = True

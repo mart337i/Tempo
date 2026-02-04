@@ -6,32 +6,39 @@ import jinja2
 
 from .commands import Command
 
+
 class Scaffold(Command):
-    """ Generates an API module skeleton. """
+    """Generates an API module skeleton."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.epilog = "Built-in templates available are: %s" % ', '.join(
-            d for d in os.listdir(builtins())
-            if d != 'base'
+        self.epilog = "Built-in templates available are: %s" % ", ".join(
+            d for d in os.listdir(builtins()) if d != "base"
         )
 
     def run(self, cmdargs):
         parser = self.parser
         parser.add_argument(
-            '-t', '--template', type=template, default=template('default'),
+            "-t",
+            "--template",
+            type=template,
+            default=template("module"),
             help="Use a custom API module template, can be a template name or the"
-                 " path to a API module template (default: %(default)s)")
-        parser.add_argument('name', help="Name of the API module to create")
+            " path to a API module template (default: %(default)s)",
+        )
+        parser.add_argument("name", help="Name of the API module to create")
         parser.add_argument(
-            'dest', default='.', nargs='?',
-            help="Directory to create the API module in (default: %(default)s)")
+            "dest",
+            default="addons",
+            nargs="?",
+            help="Directory to create the API module in (default: %(default)s)",
+        )
 
         if not cmdargs:
             sys.exit(parser.print_help())
         args = parser.parse_args(args=cmdargs)
 
-        params = {'name': args.name}
+        params = {"name": args.name}
 
         args.template.render_to(
             snake(args.name),
@@ -41,40 +48,41 @@ class Scaffold(Command):
 
 
 builtins = lambda *args: os.path.join(
-    os.path.abspath(os.path.dirname(__file__)),
-    'templates',
-    *args)
+    os.path.abspath(os.path.dirname(__file__)), "templates", *args
+)
+
 
 def snake(s):
-    """ snake cases ``s``
+    """snake cases ``s``
 
     :param str s:
     :return: str
     """
     # insert a space before each uppercase character preceded by a
     # non-uppercase letter
-    s = re.sub(r'(?<=[^A-Z])\B([A-Z])', r' \1', s)
+    s = re.sub(r"(?<=[^A-Z])\B([A-Z])", r" \1", s)
     # lowercase everything, split on whitespace and join
-    return '_'.join(s.lower().split())
+    return "_".join(s.lower().split())
+
+
 def pascal(s):
-    return ''.join(
-        ss.capitalize()
-        for ss in re.sub(r'[_\s]+', ' ', s).split()
-    )
+    return "".join(ss.capitalize() for ss in re.sub(r"[_\s]+", " ", s).split())
+
 
 def directory(p, create=False):
-    expanded = os.path.abspath(
-        os.path.expanduser(
-            os.path.expandvars(p)))
+    expanded = os.path.abspath(os.path.expanduser(os.path.expandvars(p)))
     if create and not os.path.exists(expanded):
         os.makedirs(expanded)
     if not os.path.isdir(expanded):
         sys.exit("%s is not a directory" % p)
     return expanded
 
+
 env = jinja2.Environment()
-env.filters['snake'] = snake
-env.filters['pascal'] = pascal
+env.filters["snake"] = snake
+env.filters["pascal"] = pascal
+
+
 class template(object):
     def __init__(self, identifier):
         # TODO: archives (zipfile, tarfile)
@@ -93,16 +101,15 @@ class template(object):
         return self.id
 
     def files(self):
-        """ Lists the (local) path and content of all files in the template
-        """
+        """Lists the (local) path and content of all files in the template"""
         for root, _, files in os.walk(self.path):
             for f in files:
                 path = os.path.join(root, f)
-                yield path, open(path, 'rb').read()
+                yield path, open(path, "rb").read()
 
     def render_to(self, modname, directory, params=None):
-        """ Render this API module template to ``dest`` with the provided
-         rendering parameters
+        """Render this API module template to ``dest`` with the provided
+        rendering parameters
         """
         # overwrite with local
         for path, content in self.files():
@@ -110,21 +117,31 @@ class template(object):
             local = os.path.relpath(path, self.path)
             # strip .template extension
             root, ext = os.path.splitext(local)
-            if ext == '.template':
+            if ext == ".template":
                 local = root
             dest = os.path.join(directory, modname, local)
             destdir = os.path.dirname(dest)
             if not os.path.exists(destdir):
                 os.makedirs(destdir)
 
-            with open(dest, 'wb') as f:
-                if ext not in ('.py', '.xml', '.csv', '.js', '.rst', '.html', '.template'):
+            with open(dest, "wb") as f:
+                if ext not in (
+                    ".py",
+                    ".xml",
+                    ".csv",
+                    ".js",
+                    ".rst",
+                    ".html",
+                    ".md",
+                    ".template",
+                ):
                     f.write(content)
                 else:
-                    env.from_string(content.decode('utf-8'))\
-                       .stream(params or {})\
-                       .dump(f, encoding='utf-8')
-                    f.write(b'\n')
+                    env.from_string(content.decode("utf-8")).stream(params or {}).dump(
+                        f, encoding="utf-8"
+                    )
+                    f.write(b"\n")
+
 
 def warn(message):
     print("WARNING:", message)

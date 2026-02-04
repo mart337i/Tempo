@@ -1,0 +1,79 @@
+"""
+{{ name | pascal }} Router
+
+Defines API endpoints for {{ name }} operations.
+"""
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
+
+from .controller import {{ name | pascal }}Controller
+from .schemas import (
+    {{ name | pascal }}Create,
+    {{ name | pascal }}Update,
+    {{ name | pascal }}Response,
+)
+
+router = APIRouter(
+    prefix="/{{ name | snake }}",
+    tags=["{{ name | pascal }}"],
+)
+
+controller = {{ name | pascal }}Controller()
+
+
+@router.get("/", response_model=List[{{ name | pascal }}Response])
+async def list_{{ name | snake }}s():
+    """
+    Retrieve all {{ name | snake }} records.
+    """
+    return await controller.list_all()
+
+
+@router.get("/{id}", response_model={{ name | pascal }}Response)
+async def get_{{ name | snake }}(id: int):
+    """
+    Retrieve a specific {{ name | snake }} by ID.
+    """
+    result = await controller.get_by_id(id)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"{{ name | pascal }} with id {id} not found"
+        )
+    return result
+
+
+@router.post("/", response_model={{ name | pascal }}Response, status_code=status.HTTP_201_CREATED)
+async def create_{{ name | snake }}(data: {{ name | pascal }}Create):
+    """
+    Create a new {{ name | snake }} record.
+    """
+    return await controller.create(data)
+
+
+@router.put("/{id}", response_model={{ name | pascal }}Response)
+async def update_{{ name | snake }}(id: int, data: {{ name | pascal }}Update):
+    """
+    Update an existing {{ name | snake }} record.
+    """
+    result = await controller.update(id, data)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"{{ name | pascal }} with id {id} not found"
+        )
+    return result
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_{{ name | snake }}(id: int):
+    """
+    Delete a {{ name | snake }} record.
+    """
+    success = await controller.delete(id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"{{ name | pascal }} with id {id} not found"
+        )

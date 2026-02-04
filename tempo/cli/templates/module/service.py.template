@@ -1,0 +1,82 @@
+"""
+{{ name | pascal }} Service
+
+Business logic layer for {{ name }} operations.
+"""
+
+from typing import List, Optional, Dict, Any
+
+
+class {{ name | pascal }}Service:
+    """
+    Service layer for {{ name }} business logic.
+    
+    Responsibilities:
+    - Implement business rules
+    - Interact with data models/repositories
+    - Handle data transformations
+    """
+
+    def __init__(self):
+        # In a real application, you would inject a repository/database here
+        # For now, we'll use an in-memory store as a placeholder
+        self._data_store: Dict[int, Dict[str, Any]] = {}
+        self._next_id = 1
+
+    async def get_all(self) -> List[Dict[str, Any]]:
+        """Retrieve all {{ name | snake }} records."""
+        return list(self._data_store.values())
+
+    async def get_by_id(self, id: int) -> Optional[Dict[str, Any]]:
+        """Retrieve a {{ name | snake }} by ID."""
+        return self._data_store.get(id)
+
+    async def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a new {{ name | snake }}.
+        
+        Args:
+            data: {{ name | pascal }} data to create
+            
+        Returns:
+            Created {{ name | snake }} with ID
+        """
+        item = {
+            "id": self._next_id,
+            **data
+        }
+        self._data_store[self._next_id] = item
+        self._next_id += 1
+        return item
+
+    async def update(self, id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Update an existing {{ name | snake }}.
+        
+        Args:
+            id: ID of {{ name | snake }} to update
+            data: Fields to update
+            
+        Returns:
+            Updated {{ name | snake }} or None if not found
+        """
+        if id not in self._data_store:
+            return None
+        
+        self._data_store[id].update(data)
+        return self._data_store[id]
+
+    async def delete(self, id: int) -> bool:
+        """
+        Delete a {{ name | snake }}.
+        
+        Args:
+            id: ID of {{ name | snake }} to delete
+            
+        Returns:
+            True if deleted, False if not found
+        """
+        if id in self._data_store:
+            del self._data_store[id]
+            return True
+        return False
