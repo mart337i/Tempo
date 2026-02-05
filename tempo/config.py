@@ -74,6 +74,44 @@ class TempoConfig:
                 self.config.set("server", setting_key, value)
                 _logger.debug(f"Loaded {setting_key} from environment variable")
 
+    def __getitem__(self, key: str) -> str:
+        """Shortcut access: config["host"] or config["server.host"].
+
+        Plain key (e.g. "host") is resolved by searching all sections.
+        Raises KeyError if the key is missing or ambiguous across sections.
+        """
+        if "." in key:
+            section, _, k = key.partition(".")
+            value = self.get(section, k)
+            if value is None:
+                raise KeyError(key)
+            return value
+
+        # search all sections for the key
+        matches = [
+            (section, self.config.get(section, key))
+            for section in self.config.sections()
+            if self.config.has_option(section, key)
+        ]
+        if len(matches) == 0:
+            raise KeyError(key)
+        if len(matches) > 1:
+            raise KeyError(
+                f"Ambiguous key {key!r} found in sections: "
+                + ", ".join(s for s, _ in matches)
+                + " — use 'section.key' syntax"
+            )
+        return matches[0][1]
+
+    def __repr__(self) -> str:
+        sections = {}
+        for section in self.config.sections():
+            sections[section] = dict(self.config.items(section))
+        return "\n".join(
+            f"[{section}]\n" + "\n".join(f"  {k} = {v}" for k, v in items.items())
+            for section, items in sections.items()
+        )
+
     def get(self, section: str, key: str, fallback: Any = None) -> Any:
         """
         Get a configuration value.
