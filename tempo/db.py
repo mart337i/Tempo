@@ -1,7 +1,14 @@
 import logging
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from tempo.config import get_config
+
+
+class Base(DeclarativeBase):
+    """Inherit from this in your models: class User(Base): ..."""
+
+    pass
+
 
 _logger = logging.getLogger(__name__)
 
@@ -49,6 +56,14 @@ class Database:
                 "Database not configured. Set [database] url in tempo.conf"
             )
         return self._Session()
+
+    def create_all(self):
+        """Create all tables registered on Base. Safe to call multiple times (IF NOT EXISTS)."""
+        if not self._engine:
+            raise RuntimeError(
+                "Database not configured. Set [database] url in tempo.conf"
+            )
+        Base.metadata.create_all(self._engine)
 
 
 db = Database()

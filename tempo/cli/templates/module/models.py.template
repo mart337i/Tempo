@@ -4,17 +4,14 @@
 Database models for {{ name }} (placeholder for ORM integration).
 """
 
-# This is a placeholder for database models.
-# When you integrate an ORM like SQLAlchemy or Tortoise ORM, define your models here.
-#
-# Example with SQLAlchemy:
+# Uncomment and define your ORM models here once you have a database configured.
+# See tempo.conf [database] section and tempo/db.py.
 #
 # from sqlalchemy import Column, Integer, String
-# from database import Base
+# from tempo.db import Base
 #
 # class {{ name | pascal }}(Base):
 #     __tablename__ = "{{ name | snake }}s"
 #
-#     id = Column(Integer, primary_key=True, index=True)
+#     id   = Column(Integer, primary_key=True)
 #     name = Column(String(100), nullable=False)
-#     description = Column(String(500))
