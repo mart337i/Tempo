@@ -196,6 +196,11 @@ class FastAPI(FastAPIBase):
         # Export to environment variables for factory communication
         config.export_to_env()
 
+        # Configure logging before uvicorn.run() so startup messages are captured
+        from tempo.log import setup_logging
+
+        setup_logging(config)
+
         # Get server configuration
         server_config = config.get_server_config()
 
@@ -228,6 +233,11 @@ def create_api() -> FastAPI:
     # Do NOT use get_config() singleton here because it may have been
     # initialized before environment variables were set
     config = TempoConfig()
+
+    from tempo.log import setup_logging
+
+    setup_logging(config)
+
     server_config = config.get_server_config()
 
     # Create FastAPI instance with configuration

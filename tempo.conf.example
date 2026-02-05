@@ -48,6 +48,21 @@ description = Tempo API
 version = 0.1.0
 
 # ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+# Console output is always enabled.
+# File logging is optional — set 'file' to a path to activate it.
+#
+# level  — DEBUG, INFO, WARNING, ERROR  (default: INFO)
+# file   — path to log file, empty to disable
+# format — Python logging format string
+
+[logging]
+level  = INFO
+# file   = tempo.log
+format = %(asctime)s [%(levelname)s] %(name)s: %(message)s
+
+# ---------------------------------------------------------------------------
 # Database (optional)
 # ---------------------------------------------------------------------------
 # SQLAlchemy connection URL. Leave empty or omit to disable the database layer.

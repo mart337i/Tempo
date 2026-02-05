@@ -30,6 +30,11 @@ class TempoConfig:
         "database": {
             "url": "",
         },
+        "logging": {
+            "level": "INFO",
+            "file": "",
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        },
     }
 
     def __init__(self, config_file: Optional[str] = None):
@@ -39,7 +44,7 @@ class TempoConfig:
         Args:
             config_file: Optional path to config file. Defaults to ./tempo.conf
         """
-        self.config = configparser.ConfigParser()
+        self.config = configparser.RawConfigParser()
         self.config.read_dict(self.DEFAULTS)
 
         # Determine config file path

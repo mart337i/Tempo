@@ -40,8 +40,10 @@ class Shell(Command):
 
         from tempo.config import get_config
         from tempo.db import db, Base
+        from tempo.log import setup_logging
 
         config = get_config(config_file=args.config)
+        setup_logging(config)
 
         banner = textwrap.dedent(f"""
             Tempo Shell {_version()}
