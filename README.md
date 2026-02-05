@@ -5,17 +5,37 @@ auto-discovered, configuration is INI-based with env-var and CLI overrides, and
 an optional database layer is ready when you need it.
 ---
 
+## Setup
+
+Prerequisites: [uv](https://docs.astral.sh/uv/) and Python 3.12+.
+
+```bash
+# Clone and install
+git clone <repo-url>
+cd tempo
+uv sync          # creates .venv and installs everything from uv.lock
+
+# Copy the example config
+cp tempo.conf.example tempo.conf
+```
+
+That's it. All commands below can be prefixed with `uv run` to use the managed
+environment (e.g. `uv run tempo-bin server myapi`), or you can activate the
+venv the usual way (`source .venv/bin/activate`) and run `tempo-bin` directly.
+
+---
+
 ## Getting started
 
 ```bash
 # Start the server (development mode with hot reload)
-./tempo-bin server myapi --reload
+uv run tempo-bin server myapi --reload
 
 # Start on a custom port
-./tempo-bin server myapi --port 9000
+uv run tempo-bin server myapi --port 9000
 
 # Start with a specific config file
-./tempo-bin server myapi --config ./my-tempo.conf
+uv run tempo-bin server myapi --config ./my-tempo.conf
 ```
 
 The server boots, auto-discovers everything inside `addons/`, and serves the
@@ -61,7 +81,7 @@ Example — creates `addons/users/` with router, controller, service, schemas,
 and models stubs:
 
 ```bash
-./tempo-bin scaffold users
+uv run tempo-bin scaffold users
 ```
 
 ---
@@ -116,10 +136,6 @@ The database layer is optional. It is a no-op unless you configure a
 connection URL.
 
 ### Setup
-
-```bash
-pip install sqlalchemy psycopg2-binary
-```
 
 Add a `[database]` section to your `tempo.conf`:
 
