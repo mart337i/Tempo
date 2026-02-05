@@ -3,29 +3,6 @@
 A lightweight FastAPI platform for building modular API services. Addons are
 auto-discovered, configuration is INI-based with env-var and CLI overrides, and
 an optional database layer is ready when you need it.
-
----
-
-## Project layout
-
-```
-tempo/
-├── tempo-bin                   # CLI entry point
-├── tempo.conf.example          # Reference config (copy -> tempo.conf)
-├── tempo/                      # Core package
-│   ├── __init__.py
-│   ├── config.py               # INI config manager (singleton)
-│   ├── db.py                   # Database connector (optional)
-│   ├── fastapi.py              # FastAPI subclass + app factory
-│   └── cli/                    # CLI command framework
-│       ├── commands.py         # Command base class + registry
-│       ├── server.py           # "server" command
-│       ├── scaffold.py         # "scaffold" command
-│       ├── help.py             # "help" command
-│       └── templates/          # Scaffold templates
-└── addons/                     # Your API modules live here
-```
-
 ---
 
 ## Getting started
