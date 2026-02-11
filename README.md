@@ -3,6 +3,7 @@
 A lightweight FastAPI platform for building modular API services. Addons are
 auto-discovered, configuration is INI-based with env-var and CLI overrides, and
 an optional database layer is ready when you need it.
+
 ---
 
 ## Setup
